@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      // Users can read and write their own profile
+      allow read, write: if isOwner(userId);
+      
+      // Goals subcollection
+      match /goals/{goalId} {
+        allow read, write: if isOwner(userId);
+        
+        // Tasks subcollection within goals
+        match /tasks/{taskId} {
+          allow read, write: if isOwner(userId);
+          
+          // Progress logs subcollection within tasks
+          match /progressLogs/{logId} {
+            allow read, write: if isOwner(userId);
+          }
+        }
+      }
+      
+      // Reflections subcollection
+      match /reflections/{reflectionId} {
+        allow read, write: if isOwner(userId);
+      }
+      
+      // Chat history subcollection (for AI coach)
+      match /chats/{chatId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+    
+    // Goal templates (public read, admin write)
+    match /goal-templates/{templateId} {
+      allow read: if true;
+      allow write: if false; // Only admins can write (via backend)
+    }
+  }
+}
+
