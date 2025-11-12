@@ -417,12 +417,13 @@ export default function GoalDetailPage() {
       />
 
       {/* Task Breakdown Dialog */}
-      {breakdownTask && (
+      {breakdownTask && user && (
         <TaskBreakdownDialog
           open={showTaskBreakdown}
           onOpenChange={setShowTaskBreakdown}
           task={breakdownTask}
           goal={goal}
+          userId={user.uid}
           onTaskUpdated={() => {
             // Real-time listener will update
           }}

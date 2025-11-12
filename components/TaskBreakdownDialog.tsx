@@ -12,6 +12,7 @@ interface TaskBreakdownDialogProps {
   onOpenChange: (open: boolean) => void;
   task: Task;
   goal?: Goal;
+  userId: string;
   onTaskUpdated: () => void;
 }
 
@@ -20,6 +21,7 @@ export function TaskBreakdownDialog({
   onOpenChange,
   task,
   goal,
+  userId,
   onTaskUpdated,
 }: TaskBreakdownDialogProps) {
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,7 @@ export function TaskBreakdownDialog({
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: task.userId || '',
+          userId,
           goalId: task.goalId,
           title: breakdown.refinedTitle,
           description: breakdown.refinedDescription,
