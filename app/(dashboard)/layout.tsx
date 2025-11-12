@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Target, LayoutDashboard, ListTodo, Brain, BookOpen, LogOut, Menu, BarChart3 } from 'lucide-react';
+import { Target, LayoutDashboard, ListTodo, Brain, BookOpen, LogOut, Menu, BarChart3, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -61,6 +61,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </NavLink>
               <NavLink href="/dashboard/analytics" icon={<BarChart3 className="h-5 w-5" />}>
                 Analytics
+              </NavLink>
+              <NavLink href="/dashboard/productivity" icon={<TrendingUp className="h-5 w-5" />}>
+                Productivity
               </NavLink>
               <NavLink href="/dashboard/reflections" icon={<BookOpen className="h-5 w-5" />}>
                 Reflections

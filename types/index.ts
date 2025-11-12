@@ -169,3 +169,114 @@ export interface AICoachResponse {
   motivationalQuote?: string;
 }
 
+// ===== NEW: ADAPTIVE & INTELLIGENT FEATURES =====
+
+export interface UserPreferences {
+  userId: string;
+  averageTaskDuration: number; // minutes
+  preferredTaskSize: 'small' | 'medium' | 'large';
+  mostProductiveTime: 'morning' | 'afternoon' | 'evening' | 'night';
+  workingHoursPerDay: number;
+  categoryPerformance: {
+    [category: string]: {
+      completionRate: number;
+      averageSpeed: number; // actual vs estimated ratio
+    };
+  };
+  taskTypePerformance: {
+    [taskType: string]: {
+      completionRate: number;
+      averageSpeed: number;
+    };
+  };
+  streakCount: number;
+  lastUpdated: Date;
+}
+
+export interface TaskCompletionStats {
+  taskId: string;
+  estimatedDuration: number; // minutes
+  actualDuration: number; // minutes
+  completedOnTime: boolean;
+  skipped: boolean;
+  category: string;
+  taskType: string; // extracted from task title (e.g., "design", "research", "coding")
+  completedAt: Date;
+}
+
+export interface FocusSession {
+  id: string;
+  userId: string;
+  taskId?: string;
+  goalId?: string;
+  duration: number; // minutes
+  completed: boolean;
+  startTime: Date;
+  endTime?: Date;
+  checkIns: {
+    timestamp: Date;
+    message: string;
+    userResponse?: string;
+  }[];
+}
+
+export interface AIInsight {
+  id: string;
+  userId: string;
+  type: 'bottleneck' | 'pattern' | 'recommendation' | 'warning' | 'achievement';
+  severity: 'low' | 'medium' | 'high';
+  title: string;
+  description: string;
+  actionable: boolean;
+  suggestedAction?: string;
+  relatedGoalId?: string;
+  relatedTaskId?: string;
+  createdAt: Date;
+  dismissed: boolean;
+}
+
+export interface MotivationMessage {
+  id: string;
+  userId: string;
+  message: string;
+  type: 'daily' | 'milestone' | 'streak' | 'encouragement' | 'challenge';
+  tone: 'friendly' | 'professional' | 'motivational' | 'coach';
+  createdAt: Date;
+  displayed: boolean;
+}
+
+export interface TaskPriorityScore {
+  taskId: string;
+  score: number; // 1-100
+  factors: {
+    urgency: number; // 0-10 (based on due date)
+    importance: number; // 0-10 (AI-determined)
+    impact: number; // 0-10 (affects other tasks/goals)
+    effort: number; // 0-10 (estimated difficulty)
+    userPreference: number; // 0-10 (based on past behavior)
+  };
+  recommendation: string;
+  calculatedAt: Date;
+}
+
+export interface ProductivityReport {
+  id: string;
+  userId: string;
+  weekStart: Date;
+  weekEnd: Date;
+  tasksCreated: number;
+  tasksCompleted: number;
+  goalsActive: number;
+  goalsCompleted: number;
+  focusTimeTotal: number; // minutes
+  completionRate: number; // percentage
+  onTimeRate: number; // percentage
+  streakDays: number;
+  insights: string[];
+  recommendations: string[];
+  topCategory: string;
+  bottleneckAreas: string[];
+  aiSummary: string;
+  generatedAt: Date;
+}
+

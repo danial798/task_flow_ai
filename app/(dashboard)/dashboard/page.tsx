@@ -3,19 +3,22 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { subscribeToUserGoals, subscribeToGoalTasks } from '@/lib/firebase/firestore';
-import { Goal } from '@/types';
+import { Goal, UserPreferences } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Target, Plus, TrendingUp, ListTodo, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 import { CreateGoalDialog } from '@/components/goals/CreateGoalDialog';
+import { MotivationBanner } from '@/components/MotivationBanner';
+import { InsightsPanel } from '@/components/InsightsPanel';
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const [goals, setGoals] = useState<Goal[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<UserPreferences | undefined>();
 
   useEffect(() => {
     if (!user) return;
@@ -59,6 +62,42 @@ export default function DashboardPage() {
     sum + (g.tasks?.filter(t => t.status === 'completed')?.length || 0), 0
   );
 
+  // Calculate today's tasks
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tasksToday = goals.reduce((sum, g) => 
+    sum + (g.tasks?.filter(t => {
+      const createdDate = new Date(t.createdAt);
+      createdDate.setHours(0, 0, 0, 0);
+      return createdDate.getTime() === today.getTime();
+    })?.length || 0), 0
+  );
+  const completedToday = goals.reduce((sum, g) => 
+    sum + (g.tasks?.filter(t => {
+      if (t.status !== 'completed') return false;
+      const updatedDate = new Date(t.updatedAt);
+      updatedDate.setHours(0, 0, 0, 0);
+      return updatedDate.getTime() === today.getTime();
+    })?.length || 0), 0
+  );
+
+  // Initialize user preferences
+  useEffect(() => {
+    if (user && !userPreferences) {
+      setUserPreferences({
+        userId: user.uid,
+        averageTaskDuration: 60,
+        preferredTaskSize: 'medium',
+        mostProductiveTime: 'morning',
+        workingHoursPerDay: 8,
+        categoryPerformance: {},
+        taskTypePerformance: {},
+        streakCount: 0,
+        lastUpdated: new Date(),
+      });
+    }
+  }, [user]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -83,6 +122,14 @@ export default function DashboardPage() {
           New Goal
         </Button>
       </div>
+
+      {/* AI Motivation Banner */}
+      <MotivationBanner
+        tasksToday={tasksToday}
+        completedToday={completedToday}
+        streakDays={userPreferences?.streakCount || 0}
+        upcomingMilestones={0}
+      />
 
       {/* Stats */}
       <div className="grid md:grid-cols-4 gap-6">
@@ -135,6 +182,11 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* AI Insights */}
+      {goals.length > 0 && userPreferences && (
+        <InsightsPanel goals={goals} userPreferences={userPreferences} />
+      )}
 
       {/* Recently Completed */}
       {completedGoals.length > 0 && (

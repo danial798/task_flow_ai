@@ -7,13 +7,16 @@ import { Goal, Task } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, Calendar, Target, Edit, Trash2, CheckCircle2, Circle, Download, Share2, BookOpen } from 'lucide-react';
+import { ArrowLeft, Calendar, Target, Edit, Trash2, CheckCircle2, Circle, Download, Share2, BookOpen, Focus, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { exportGoalToPDF, generateShareableLink, copyToClipboard } from '@/lib/export-utils';
 import { ProgressCelebration } from '@/components/ProgressCelebration';
 import { GoalRetrospective } from '@/components/retrospectives/GoalRetrospective';
 import { subscribeToGoal, subscribeToGoalTasks } from '@/lib/firebase/firestore';
+import { FocusMode } from '@/components/FocusMode';
+import { TaskBreakdownDialog } from '@/components/TaskBreakdownDialog';
+import { GoalVisualization } from '@/components/GoalVisualization';
 
 export default function GoalDetailPage() {
   const { user } = useAuth();
@@ -26,6 +29,10 @@ export default function GoalDetailPage() {
   const [celebrationType, setCelebrationType] = useState<'task' | 'goal'>('task');
   const [celebrationTitle, setCelebrationTitle] = useState('');
   const [showRetrospective, setShowRetrospective] = useState(false);
+  const [showFocusMode, setShowFocusMode] = useState(false);
+  const [focusTask, setFocusTask] = useState<Task | undefined>();
+  const [showTaskBreakdown, setShowTaskBreakdown] = useState(false);
+  const [breakdownTask, setBreakdownTask] = useState<Task | undefined>();
 
   useEffect(() => {
     if (!user || !params.goalId) return;
@@ -327,7 +334,15 @@ export default function GoalDetailPage() {
                   <TaskItem 
                     key={task.id} 
                     task={task} 
-                    onToggle={() => handleTaskToggle(task)} 
+                    onToggle={() => handleTaskToggle(task)}
+                    onFocus={() => {
+                      setFocusTask(task);
+                      setShowFocusMode(true);
+                    }}
+                    onBreakdown={() => {
+                      setBreakdownTask(task);
+                      setShowTaskBreakdown(true);
+                    }}
                   />
                 ))
             ) : (
@@ -336,6 +351,9 @@ export default function GoalDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Goal Visualization */}
+      <GoalVisualization goal={goal} />
 
       {/* Resources */}
       {goal.resources && goal.resources.length > 0 && (
@@ -389,15 +407,46 @@ export default function GoalDetailPage() {
         onOpenChange={setShowRetrospective}
         goal={goal}
       />
+
+      {/* Focus Mode */}
+      <FocusMode
+        open={showFocusMode}
+        onOpenChange={setShowFocusMode}
+        task={focusTask}
+        goal={goal}
+      />
+
+      {/* Task Breakdown Dialog */}
+      {breakdownTask && (
+        <TaskBreakdownDialog
+          open={showTaskBreakdown}
+          onOpenChange={setShowTaskBreakdown}
+          task={breakdownTask}
+          goal={goal}
+          onTaskUpdated={() => {
+            // Real-time listener will update
+          }}
+        />
+      )}
     </div>
   );
 }
 
-function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
+function TaskItem({ 
+  task, 
+  onToggle, 
+  onFocus,
+  onBreakdown,
+}: { 
+  task: Task; 
+  onToggle: () => void;
+  onFocus: () => void;
+  onBreakdown: () => void;
+}) {
   const isCompleted = task.status === 'completed';
 
   return (
-    <div className={`border rounded-lg p-4 transition-all ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
+    <div className={`border rounded-lg p-4 transition-all group hover:shadow-md ${isCompleted ? 'bg-green-50 border-green-200' : 'bg-white'}`}>
       <div className="flex items-start space-x-3">
         <button
           onClick={onToggle}
@@ -411,7 +460,7 @@ function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
         </button>
         <div className="flex-1">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="flex-1">
               <h4 className={`font-medium ${isCompleted ? 'line-through text-gray-600' : ''}`}>
                 {task.title}
               </h4>
@@ -430,8 +479,31 @@ function TaskItem({ task, onToggle }: { task: Task; onToggle: () => void }) {
                   ))}
                 </div>
               )}
+              {/* Task Actions - Only show on hover and for non-completed tasks */}
+              {!isCompleted && (
+                <div className="mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onFocus}
+                    className="gap-1 text-xs"
+                  >
+                    <Focus className="h-3 w-3" />
+                    Focus
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onBreakdown}
+                    className="gap-1 text-xs"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    Refine
+                  </Button>
+                </div>
+              )}
             </div>
-            <span className={`px-2 py-1 rounded text-xs ${getPriorityColor(task.priority)}`}>
+            <span className={`px-2 py-1 rounded text-xs ml-2 ${getPriorityColor(task.priority)}`}>
               {task.priority}
             </span>
           </div>
