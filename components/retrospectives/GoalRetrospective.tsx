@@ -69,7 +69,7 @@ export function GoalRetrospective({ open, onOpenChange, goal }: GoalRetrospectiv
                 <span>Goal Retrospective</span>
               </DialogTitle>
               <DialogDescription>
-                Reflect on "{goal.title}" and unlock AI-powered insights
+                Reflect on &quot;{goal.title}&quot; and unlock AI-powered insights
               </DialogDescription>
             </DialogHeader>
 
@@ -156,7 +156,7 @@ export function GoalRetrospective({ open, onOpenChange, goal }: GoalRetrospectiv
             <DialogHeader>
               <DialogTitle>Your Retrospective Report</DialogTitle>
               <DialogDescription>
-                Insights and recommendations for "{goal.title}"
+                Insights and recommendations for &quot;{goal.title}&quot;
               </DialogDescription>
             </DialogHeader>
 
