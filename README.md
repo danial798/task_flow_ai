@@ -141,38 +141,6 @@ taskflow-ai/
 ├── tailwind.config.ts
 └── next.config.js
 ```
-
-
-## 🎯 Usage Guide
-
-### Creating Your First Goal
-
-1. Sign up or log in to your account
-2. Click "New Goal" on the dashboard
-3. Describe your goal (e.g., "Launch my SaaS product")
-4. Add optional context about your experience or constraints
-5. Click "Generate AI Roadmap"
-6. Review the AI-generated tasks and resources
-7. Save and start working!
-
-### Working with Tasks
-
-- Click on any goal to view its tasks
-- Check off tasks as you complete them
-- Progress automatically updates
-- AI coach is available for help at any time
-
-### Using the AI Coach
-
-1. Navigate to the "AI Coach" page
-2. Ask questions like:
-   - "How do I overcome procrastination?"
-   - "I'm stuck on this task, what should I do?"
-   - "Give me motivation to keep going"
-3. Get personalized, contextual advice
-
-### Viewing Reflections
-
 - Weekly reflections are automatically generated
 - View insights about your progress
 - Get AI recommendations for improvement
