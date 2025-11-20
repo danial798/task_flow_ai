@@ -6,11 +6,7 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Use Netlify's Essential Next.js plugin
+# Use Netlify's Next.js plugin (handles API routes automatically)
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-
-# Configure serverless functions
-[functions]
-  node_bundler = "esbuild"
 

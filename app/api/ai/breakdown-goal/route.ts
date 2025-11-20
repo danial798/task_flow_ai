@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { openai, AI_MODEL } from '@/lib/openai/client';
 import { GOAL_BREAKDOWN_PROMPT, generateGoalBreakdownPrompt } from '@/lib/openai/prompts';
 
-// Configure the route for Netlify
-export const runtime = 'nodejs';
-export const maxDuration = 10; // Maximum allowed on free tier
+// Netlify configuration
+export const dynamic = 'force-dynamic';
+export const maxDuration = 10;
 
 export async function POST(request: NextRequest) {
   try {
