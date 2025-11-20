@@ -63,7 +63,9 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to generate plan');
+        const errorMessage = errorData.error || 'Failed to generate plan';
+        const errorDetails = errorData.details ? ` (${errorData.details})` : '';
+        throw new Error(errorMessage + errorDetails);
       }
 
       const data = await response.json();
@@ -75,8 +77,11 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
         description: 'Review your personalized plan below',
       });
     } catch (error: any) {
-      // Retry logic for timeouts
-      if ((error.name === 'AbortError' || error.message?.includes('timeout')) && retryCount < 2) {
+      // Retry logic for timeouts (but NOT for API key errors)
+      const isTimeout = error.name === 'AbortError' || error.message?.includes('timeout');
+      const isConfigError = error.message?.includes('not configured') || error.message?.includes('Invalid OpenAI');
+      
+      if (isTimeout && retryCount < 2 && !isConfigError) {
         toast({
           title: '⏱️ Taking longer than expected...',
           description: `Retrying... (Attempt ${retryCount + 2}/3)`,
@@ -85,11 +90,22 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
         return;
       }
 
+      // Show specific error message
+      let errorTitle = 'Error';
+      let errorDescription = error.message || 'Failed to generate AI plan. Please try again.';
+      
+      if (isConfigError) {
+        errorTitle = '⚙️ Configuration Error';
+      } else if (isTimeout) {
+        errorTitle = '⏱️ Timeout';
+        errorDescription = 'Request timed out. Please try a shorter goal description or try again later.';
+      } else if (error.message?.includes('Rate limit')) {
+        errorTitle = '⚠️ Rate Limit';
+      }
+
       toast({
-        title: 'Error',
-        description: error.message?.includes('timeout') 
-          ? 'Request timed out. Please try a shorter goal description or try again later.'
-          : 'Failed to generate AI plan. Please try again.',
+        title: errorTitle,
+        description: errorDescription,
         variant: 'destructive',
       });
       setStep('input');
