@@ -82,7 +82,7 @@ Weekly AI-generated summaries analyzing what worked, what didn't, and how to imp
 - **Embeddings**: OpenAI Embeddings API
 
 ### Deployment
-- **Frontend Hosting**: Vercel
+- **Frontend Hosting**: Netlify
 - **Backend**: Firebase
 - **CI/CD**: GitHub Actions
 
