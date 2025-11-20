@@ -4,7 +4,7 @@ import { GOAL_BREAKDOWN_PROMPT, generateGoalBreakdownPrompt } from '@/lib/openai
 
 // Netlify configuration
 export const dynamic = 'force-dynamic';
-export const maxDuration = 10;
+export const maxDuration = 26; // Netlify max for Starter plan
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,27 +31,31 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Starting AI goal breakdown request...');
-    console.log('Goal:', goal.substring(0, 100) + '...'); // Log first 100 chars only
+    console.log('Goal:', typeof goal === 'string' ? goal.substring(0, Math.min(100, goal.length)) : goal);
     console.log('Model:', AI_MODEL);
-    console.log('API Key present:', process.env.OPENAI_API_KEY ? 'Yes (starts with ' + process.env.OPENAI_API_KEY.substring(0, 7) + ')' : 'No');
+    console.log('API Key present:', process.env.OPENAI_API_KEY ? `Yes (starts with ${process.env.OPENAI_API_KEY.substring(0, 7)})` : 'No');
 
     // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 25000); // 25 second timeout (under Netlify's 26s limit)
 
     try {
-      const completion = await openai.chat.completions.create({
-        model: AI_MODEL,
-        messages: [
-          { role: 'system', content: GOAL_BREAKDOWN_PROMPT },
-          { role: 'user', content: generateGoalBreakdownPrompt(goal, context) },
-        ],
-        temperature: 0.5,
-        max_tokens: 800,
-        response_format: { type: 'json_object' },
-      }, {
-        signal: controller.signal as any,
-      });
+      const completion = await openai.chat.completions.create(
+        {
+          model: AI_MODEL,
+          messages: [
+            { role: 'system', content: GOAL_BREAKDOWN_PROMPT },
+            { role: 'user', content: generateGoalBreakdownPrompt(goal, context) },
+          ],
+          temperature: 0.7,
+          max_tokens: 1500,
+          response_format: { type: 'json_object' },
+        },
+        {
+          timeout: 25000,
+          signal: controller.signal as any,
+        }
+      );
 
       clearTimeout(timeoutId);
 
