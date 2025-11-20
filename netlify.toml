@@ -10,3 +10,7 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
+# Configure serverless functions
+[functions]
+  node_bundler = "esbuild"
+
