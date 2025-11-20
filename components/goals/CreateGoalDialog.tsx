@@ -26,7 +26,7 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
   const [category, setCategory] = useState('');
   const [aiPlan, setAiPlan] = useState<any>(null);
 
-  const handleGeneratePlan = async () => {
+  const handleGeneratePlan = async (retryCount = 0) => {
     if (!goalTitle.trim()) {
       toast({
         title: 'Error',
@@ -39,12 +39,16 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
     // 🚀 INSTANT FEEDBACK - Show generating immediately
     toast({
       title: '🤖 AI is thinking...',
-      description: 'Generating your personalized roadmap',
+      description: 'Generating your personalized roadmap (this may take 10-15 seconds)',
     });
 
     setStep('generating');
 
     try {
+      // Add timeout to fetch request (15 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000);
+
       const response = await fetch('/api/ai/breakdown-goal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,9 +56,15 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
           goal: goalTitle,
           context: goalDescription,
         }),
+        signal: controller.signal,
       });
 
-      if (!response.ok) throw new Error('Failed to generate plan');
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to generate plan');
+      }
 
       const data = await response.json();
       setAiPlan(data.breakdown);
@@ -64,10 +74,22 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
         title: '✨ AI Roadmap Ready!',
         description: 'Review your personalized plan below',
       });
-    } catch (error) {
+    } catch (error: any) {
+      // Retry logic for timeouts
+      if ((error.name === 'AbortError' || error.message?.includes('timeout')) && retryCount < 2) {
+        toast({
+          title: '⏱️ Taking longer than expected...',
+          description: `Retrying... (Attempt ${retryCount + 2}/3)`,
+        });
+        setTimeout(() => handleGeneratePlan(retryCount + 1), 1000);
+        return;
+      }
+
       toast({
         title: 'Error',
-        description: 'Failed to generate AI plan. Please try again.',
+        description: error.message?.includes('timeout') 
+          ? 'Request timed out. Please try a shorter goal description or try again later.'
+          : 'Failed to generate AI plan. Please try again.',
         variant: 'destructive',
       });
       setStep('input');

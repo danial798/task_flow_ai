@@ -14,15 +14,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const completion = await openai.chat.completions.create({
+    // Add timeout to prevent long-running requests
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Request timeout - please try again')), 8000)
+    );
+
+    const completionPromise = openai.chat.completions.create({
       model: AI_MODEL,
       messages: [
         { role: 'system', content: GOAL_BREAKDOWN_PROMPT },
         { role: 'user', content: generateGoalBreakdownPrompt(goal, context) },
       ],
       temperature: 0.7,
+      max_tokens: 1000, // Limit response size for faster completion
       response_format: { type: 'json_object' },
     });
+
+    const completion = await Promise.race([completionPromise, timeoutPromise]) as any;
 
     const responseContent = completion.choices[0].message.content;
     if (!responseContent) {
