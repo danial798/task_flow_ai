@@ -26,7 +26,7 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
   const [category, setCategory] = useState('');
   const [aiPlan, setAiPlan] = useState<any>(null);
 
-  const handleGeneratePlan = async (retryCount = 0) => {
+  const generatePlanWithRetry = async (retryCount = 0) => {
     if (!goalTitle.trim()) {
       toast({
         title: 'Error',
@@ -81,7 +81,7 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
           title: '⏱️ Taking longer than expected...',
           description: `Retrying... (Attempt ${retryCount + 2}/3)`,
         });
-        setTimeout(() => handleGeneratePlan(retryCount + 1), 1000);
+        setTimeout(() => generatePlanWithRetry(retryCount + 1), 1000);
         return;
       }
 
@@ -94,6 +94,10 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
       });
       setStep('input');
     }
+  };
+
+  const handleGeneratePlan = () => {
+    generatePlanWithRetry(0);
   };
 
   const handleSaveGoal = async () => {
