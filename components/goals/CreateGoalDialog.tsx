@@ -171,7 +171,11 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
                   placeholder="e.g., Launch my startup, Learn Spanish, Run a marathon"
                   value={goalTitle}
                   onChange={(e) => setGoalTitle(e.target.value)}
+                  maxLength={150}
                 />
+                <p className="text-xs text-muted-foreground text-right">
+                  {goalTitle.length}/150 characters
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="description">Additional Context (Optional)</Label>
@@ -181,7 +185,11 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
                   value={goalDescription}
                   onChange={(e) => setGoalDescription(e.target.value)}
                   rows={4}
+                  maxLength={500}
                 />
+                <p className="text-xs text-muted-foreground text-right">
+                  {goalDescription.length}/500 characters
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">Category (Optional)</Label>

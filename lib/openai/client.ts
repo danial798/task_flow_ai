@@ -1,11 +1,9 @@
 import OpenAI from 'openai';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('Missing OPENAI_API_KEY environment variable');
-}
-
+// Initialize OpenAI client (will use API key from environment)
+// The API key check is handled in the route to provide better error messages
 export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || 'placeholder-key-for-build',
 });
 
 // Use gpt-4o-mini for faster responses and lower costs (perfect for goal breakdown)
