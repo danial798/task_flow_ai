@@ -39,15 +39,15 @@ export function CreateGoalDialog({ open, onOpenChange, onGoalCreated }: CreateGo
     // 🚀 INSTANT FEEDBACK - Show generating immediately
     toast({
       title: '🤖 AI is thinking...',
-      description: 'Generating your personalized roadmap (this may take 10-15 seconds)',
+      description: 'Generating your roadmap (5-8 seconds)...',
     });
 
     setStep('generating');
 
     try {
-      // Add timeout to fetch request (15 seconds)
+      // Add timeout to fetch request (12 seconds - must complete before Netlify's 10s limit)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       const response = await fetch('/api/ai/breakdown-goal', {
         method: 'POST',

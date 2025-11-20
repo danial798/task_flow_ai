@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Add timeout to prevent long-running requests
+    // Aggressive timeout to stay within Netlify's 10-second limit
     const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Request timeout - please try again')), 8000)
+      setTimeout(() => reject(new Error('Request timeout - please try a shorter description')), 7000)
     );
 
     const completionPromise = openai.chat.completions.create({
@@ -25,8 +25,8 @@ export async function POST(request: NextRequest) {
         { role: 'system', content: GOAL_BREAKDOWN_PROMPT },
         { role: 'user', content: generateGoalBreakdownPrompt(goal, context) },
       ],
-      temperature: 0.7,
-      max_tokens: 1000, // Limit response size for faster completion
+      temperature: 0.5, // Lower for faster, more focused responses
+      max_tokens: 600, // Reduced for faster completion
       response_format: { type: 'json_object' },
     });
 
